@@ -20,7 +20,7 @@ a:hover { background-color:#dfe6f6; }
     }
   }
 
-  function makeEntry(tab) {
+  function makeEntry(tab, active) {
     var text = document.createElement('span');
     var link = document.createElement('a');
     var favIcon = new Image();
@@ -51,7 +51,7 @@ a:hover { background-color:#dfe6f6; }
     for(var i=0;i<tabs.length;i++) {
 
       var box = document.getElementById('content');
-      box.appendChild(makeEntry(tabs[i]));
+      box.appendChild(makeEntry(tabs[i]), true);
       //, (tabs[i] == getCurrentTab()) );
 
     }
