@@ -1,0 +1,75 @@
+<style>
+body {
+  overflow-x:hidden;
+}
+
+a {
+  display:block;
+  padding-left:5px;
+  height:24px;
+  line-height:24px;
+  white-space:nowrap;
+  color:black;
+  text-decoration:none;
+
+}
+a span {
+  font-size:12px;
+  line-height:24px;
+  height:24px;
+}
+a img {
+  height:16px;
+  width:16px;
+  padding-top:4px;
+  padding-bottom:4px;
+}
+a:hover {
+  background-color:#dfe6f6;
+}
+
+</style>
+
+<script>
+
+  function truncate(str) {
+    var MAXCHARS=64;
+    if (str.length > MAXCHARS) {
+      return str.substring(0, MAXCHARS) + '...'
+    }else {
+      return str;
+    }
+  }
+
+  chrome.tabs.getAllInWindow(undefined, function callBack(tabs) {
+    var favIcons = [];
+    for(var i=0;i<tabs.length;i++) {
+      var box = document.getElementById('content');
+      var text = document.createElement('span');
+      var link = document.createElement('a');
+      var favIcon = new Image();
+
+      var title = truncate(tabs[i].title);
+      var url = tabs[i].url;
+
+      favIcon.src = tabs[i].favIconUrl;
+      favIcon.alt = 'favIcon'
+
+      text.textContent = title;
+
+      link.setAttribute('href', url);
+
+      link.appendChild(favIcon);
+      link.appendChild(text);
+
+      box.appendChild(link);
+    }
+    loadImgs(favIcons);
+  })
+
+</script>
+<body>
+  <div id="content">
+  </div>
+</body>
+
