@@ -1,74 +1,61 @@
 <style>
-body {
-  overflow-x:hidden;
-}
-
-a {
-  display:block;
-  padding-left:5px;
-  height:24px;
-  line-height:24px;
-  white-space:nowrap;
-  color:black;
-  text-decoration:none;
-
-}
-a span {
-  margin-left:5px;
-  font-size:12px;
-  vertical-align:middle;
-  line-height:24px;
-  height:24px;
-}
-a img {
-  vertical-align:middle;
-  height:16px;
-  width:16px;
-  padding-top:4px;
-  padding-bottom:4px;
-}
-a:hover {
-  background-color:#dfe6f6;
-}
-
+body { overflow-x:hidden; }
+a { display:block; padding-left:5px; height:24px; line-height:24px; white-space:nowrap; color:black; text-decoration:none; }
+a.active { font-weight:bolder; }
+a span { margin-left:5px; font-size:12px; vertical-align:middle; line-height:24px; height:24px; }
+a img { vertical-align:middle; height:16px; width:16px; padding-top:4px; padding-bottom:4px; }
+a:hover { background-color:#dfe6f6; } 
 </style>
 
 <script>
+  db = new Array;
+  tmp = new Object;
 
   function truncate(str) {
     var MAXCHARS=64;
-    if (str.length > MAXCHARS) {
+    if (str && str.length > MAXCHARS) {
       return str.substring(0, MAXCHARS) + '...'
     }else {
       return str;
     }
   }
 
-  chrome.tabs.getAllInWindow(undefined, function callBack(tabs) {
-    var favIcons = [];
+  function makeEntry(tab) {
+    var text = document.createElement('span');
+    var link = document.createElement('a');
+    var favIcon = new Image();
+
+    var title = truncate(tab.title);
+    var url = tab.url;
+
+    favIcon.src = tab.favIconUrl;
+    favIcon.alt = 'favIcon'
+
+    text.textContent = title;
+
+    link.setAttribute('href', url);
+
+    link.appendChild(favIcon);
+    link.appendChild(text);
+
+    if (active) link.className += ' active'
+
+    return link;
+  }
+
+
+  function getCurrentTab() { chrome.tabs.getSelected(undefined, function f(tab) { tmp = tab; }); return tmp; }
+
+  chrome.tabs.getAllInWindow(null, function f(tabs) {
+
     for(var i=0;i<tabs.length;i++) {
+
       var box = document.getElementById('content');
-      var text = document.createElement('span');
-      var link = document.createElement('a');
-      var favIcon = new Image();
+      box.appendChild(makeEntry(tabs[i]));
+      //, (tabs[i] == getCurrentTab()) );
 
-      var title = truncate(tabs[i].title);
-      var url = tabs[i].url;
-
-      favIcon.src = tabs[i].favIconUrl;
-      favIcon.alt = 'favIcon'
-
-      text.textContent = title;
-
-      link.setAttribute('href', url);
-
-      link.appendChild(favIcon);
-      link.appendChild(text);
-
-      box.appendChild(link);
     }
-    loadImgs(favIcons);
-  })
+  });
 
 </script>
 <body>
