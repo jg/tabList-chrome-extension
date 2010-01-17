@@ -1,7 +1,11 @@
 <style>
 body { overflow-x:hidden; }
+#content {
+}
 a { display:block; padding-left:5px; height:24px; line-height:24px; white-space:nowrap; color:black; text-decoration:none; }
-a.active { font-weight:bolder; }
+a.active, a.active:hover { 
+  background-color:lightgreen;
+}
 a span { margin-left:5px; font-size:12px; vertical-align:middle; line-height:24px; height:24px; }
 a img { vertical-align:middle; height:16px; width:16px; padding-top:4px; padding-bottom:4px; }
 a:hover { background-color:#dfe6f6; } 
@@ -13,6 +17,11 @@ a:hover { background-color:#dfe6f6; }
     tabCurrent: new Object
   }
 
+  Array.prototype.each = function (fn) {
+    for(var i=0;i<this.length;i++){ 
+      fn(this[i]);
+    }
+  }
   String.prototype.truncate = function (maxChars) {
     if (typeof maxChars === 'undefined')
       var maxChars = 64;
@@ -44,20 +53,42 @@ a:hover { background-color:#dfe6f6; }
     link.appendChild(favIcon);
     link.appendChild(text);
 
-    if (tab.selected) link.className += ' active';
+    if (tab.selected) link.className = 'active';
 
     return link;
   }
-  function setActive(tab) {
-  
+
+  function setActiveLink() {
+    console.log(tabInfo.tabCurrent.url);
+    var box = document.getElementById('content');
+    var len = box.childNodes.length;
+
+
+    //remove all classNames where active
+    for(var i=0;i<len;i++) {
+      if (box.childNodes[i].localName == 'a') {
+        var link = box.childNodes[i];
+        if (link.className.match('active')) link.className = '';
+      }
+    }
+
+    // add active className for the appropriate link
+    for(var i=0;i<len;i++) {
+      if (box.childNodes[i].localName == 'a') {
+      var link = box.childNodes[i];
+      var linkId = link.getAttribute('id');
+      if ( linkId == tabInfo.tabCurrent.id ) link.className += ' active';
+      }
+    }
   }
   function init() {
-    var tabs = window.tabInfo.tabList;
+    var tabs = tabInfo.tabList;
 
     var box = document.getElementById('content');
 
     for(var i=0;i<tabs.length;i++) {
       if (tabs[i].selected) tabInfo.tabCurrent = tabs[i];
+
       if (tabs[i].status == 'complete') {
         var link = makeEntry(tabs[i]);
         box.appendChild(link);
@@ -66,14 +97,9 @@ a:hover { background-color:#dfe6f6; }
           e.preventDefault(); 
           var tabId = parseInt(this.getAttribute('id'));
           chrome.tabs.update(tabId, {selected:true}, function cb(tab){
-            setActive(tab);
+            tabInfo.tabCurrent = tab;
+            setActiveLink();
           })
-          //console.log("clicked");
-          //console.log(window.tabList.findByTabId(tabId));
-          //chrome.tabs.update(tabInfo.tabCurrent.id, {selected:false});
-          //chrome.tabs.update(tabId, {selected:true});
-          //tabInfo.tabCurrent = tabInfo.findByTabId(tabId);
-          //console.log(window.tabs);
         }
       }
     }
