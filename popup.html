@@ -13,13 +13,10 @@ a:hover { background-color:#dfe6f6; }
   db = new Array;
   tmp = new Object;
 
-  function truncate(str) {
-    var MAXCHARS=64;
-    if (str && str.length > MAXCHARS) {
-      return str.substring(0, MAXCHARS) + '...'
-    }else {
-      return str;
-    }
+  String.prototype.truncate = function (maxChars) {
+    if (typeof maxChars === 'undefined')
+      var maxChars = 64;
+    if (this && this.length > maxChars) return this.substring(0, maxChars) + '...'; else return this;
   }
 
   function tabClicked(tab) {
@@ -32,7 +29,7 @@ a:hover { background-color:#dfe6f6; }
     var link = document.createElement('a');
     var favIcon = new Image();
 
-    var title = truncate(tab.title);
+    var title = tab.title.truncate();
     var url = tab.url;
 
     favIcon.src = tab.favIconUrl;
@@ -57,9 +54,10 @@ a:hover { background-color:#dfe6f6; }
     var box = document.getElementById('content');
 
     for(var i=0;i<tabs.length;i++) {
-      var link = makeEntry(tabs[i]);
-      box.appendChild(link);
-
+      if (tabs[i].status == 'complete') {
+        var link = makeEntry(tabs[i]);
+        box.appendChild(link);
+      }
     }
   });
 
