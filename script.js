@@ -1,16 +1,12 @@
 var tabInfo = {
-  tabList: new Array,
-  tabCurrent: new Object,
-  currentTabId: new Number,
-  lastTabId: new Number
+  currentTabId: null,
+  lastTabId: null
 }
 
 window.addEventListener("load", function(){//{{{
-  chrome.tabs.getSelected(null, function(tab){ tabInfo.tabCurrent = tab; })
   chrome.tabs.getAllInWindow(null, function f(tabs) { 
-    tabInfo.tabList = tabs; 
     createPopup();
-    listTabs();
+    listTabs(tabs);
   });
 });
 //}}}
@@ -20,8 +16,13 @@ function createPopup() {//{{{
   document.body.appendChild(box);
 }
 //}}}
-function listTabs() {//{{{
-  var tabs = tabInfo.tabList;
+function removeLink(id) {//{{{
+  var link = document.getElementById(id);
+  var box = document.getElementById('content');
+  box.removeChild(link); 
+}
+//}}}
+function listTabs(tabs) {//{{{
 
   var box = document.getElementById('content');
 
@@ -32,15 +33,24 @@ function listTabs() {//{{{
       // append to box
       box.appendChild(link);
 
+      // bind onclick to .close icon img
+      link.lastChild.addEventListener('click', function(e){ 
+          // remove tab
+          chrome.tabs.remove(parseInt(this.parentNode.id)); 
+          // remove link
+          removeLink(this.parentNode.id);
+      });
+
       // bind onclick to link
-      link.onclick = function (e) { 
-        // don't follow link href
-        e.preventDefault(); 
-        // get id of link's tab
-        var tabId = parseInt(this.getAttribute('id'));
-        // select clicked tab
-        chrome.tabs.update(tabId, {selected:true}, function cb(tab){ setActiveLink(tab.id); });
-      }
+      link.addEventListener('click', function (e) { 
+          // don't follow link href
+          e.preventDefault(); 
+          // get id of link's tab
+          var tabId = parseInt(this.getAttribute('id'));
+          // select clicked tab
+          chrome.tabs.update(tabId, {selected:true}, function cb(tab){ setActiveLink(tab.id); });
+        }
+        , false);
     }
   }
 }
@@ -55,12 +65,18 @@ function makeEntry(tab) {//{{{
   var text = document.createElement('span');
   var link = document.createElement('a');
   var favIcon = new Image();
+  var closeIcon = new Image();
 
   var title = tab.title.truncate();
   var url = tab.url;
 
   favIcon.src = tab.favIconUrl;
-  favIcon.alt = 'favIcon'
+  favIcon.alt = 'favIcon';
+  favIcon.className = 'favIcon';
+
+  closeIcon.src = 'close.png';
+  closeIcon.alt = 'close';
+  closeIcon.className = 'close';
 
   text.textContent = title;
 
@@ -69,6 +85,7 @@ function makeEntry(tab) {//{{{
 
   link.appendChild(favIcon);
   link.appendChild(text);
+  link.appendChild(closeIcon);
 
   if (tab.selected) {
     link.className = 'active';
